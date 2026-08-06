@@ -24,7 +24,9 @@ os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 os.environ["HF_HUB_DISABLE_PROGRESS_BARS"] = "1"
 import json
+import time
 import logging
+import argparse
 import torch
 import chromadb
 from transformers import AutoTokenizer, AutoModel
@@ -37,24 +39,30 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SCRIPT_DIR)
 sys.path.insert(0, SCRIPT_DIR)
 
-# ==================== 向量库构建模块（完整保留原构建脚本逻辑） ====================
-current_dir = os.getcwd()
-REPO_ID = "BAAI/bge-small-zh-v1.5"
-CACHE_FOLDER = os.path.join(current_dir, "bge-small-zh-v1.5")
+# ==================== 向量库构建模块（与 ingest.py 完全对齐） ====================
+LOCAL_MODEL_PATH = os.path.join(SCRIPT_DIR, "bge-small-zh-v1.5")
+HF_MODEL_NAME = "BAAI/bge-small-zh-v1.5"
 
-ROOT = os.path.dirname(current_dir)
-JSON_FOLDER = os.path.join(ROOT, "data", "processed")
-CHROMA_STORE = os.path.join(ROOT, "chroma_db")
+# 优先本地路径（Transformers老版本环境），不存在则用 HF 名称（新版环境）
+if os.path.isdir(LOCAL_MODEL_PATH):
+    MODEL_PATH = LOCAL_MODEL_PATH
+else:
+    MODEL_PATH = HF_MODEL_NAME
+CACHE_FOLDER = os.path.join(SCRIPT_DIR, "bge-small-zh-v1.5")
+
+JSON_FOLDER = os.path.join(ROOT_DIR, "data", "processed")
+CHROMA_STORE = os.path.join(ROOT_DIR, "chroma_db")
 CHUNK_SIZE = 300
 CHUNK_OVERLAP = 50
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-tokenizer = AutoTokenizer.from_pretrained(REPO_ID, cache_dir=CACHE_FOLDER)
-model = AutoModel.from_pretrained(REPO_ID, cache_dir=CACHE_FOLDER).to(device)
+tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
+model = AutoModel.from_pretrained(MODEL_PATH).to(device)
 model.eval()
 
 
 def get_embedding(text: str):
+    """生成文本向量 — 与 ingest.py 保持 Mean Pooling 一致"""
     inputs = tokenizer(
         text,
         padding=True,
@@ -64,8 +72,7 @@ def get_embedding(text: str):
     ).to(device)
     with torch.no_grad():
         out = model(**inputs)
-    vec = out.last_hidden_state[:, 0]
-    vec = torch.nn.functional.normalize(vec, p=2, dim=1).squeeze().cpu().numpy().tolist()
+    vec = out.last_hidden_state.mean(dim=1).squeeze().cpu().numpy().tolist()
     return vec
 
 
@@ -166,7 +173,6 @@ def upload_knowledge_file(file):
     batch_embeds = []
     batch_docs = []
     batch_meta = []
-    import time
     base_id = f"upload_{filename}_{int(time.time())}"
     for idx, block in enumerate(chunks):
         cid = f"{base_id}_blk_{idx}"
@@ -394,8 +400,6 @@ def create_ui():
 
 # ---------- 入口 ----------
 if __name__ == "__main__":
-    import argparse
-
     parser = argparse.ArgumentParser(description="鲁迅数字人 Gradio聊天 + 向量库一体化脚本")
     parser.add_argument("--build-db", action="store_true", help="执行构建Chroma向量库，构建完成程序直接退出，不启动web界面")
     parser.add_argument("--port", type=int, default=7860, help="服务端口（默认 7860）")

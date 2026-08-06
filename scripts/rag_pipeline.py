@@ -67,23 +67,25 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("rag_pipeline")
 
 # ============================================================
-# 模型配置【与入库脚本完全对齐 repo_id + cache_dir】
+# 模型配置 — 与 ingest.py/query.py 完全对齐
 # ============================================================
-# 移除旧的本地MODEL_PATH模式，使用repo_id联网缓存模式，规避tokenizer/model_type bug
-REPO_ID = "BAAI/bge-small-zh-v1.5"
-CACHE_FOLDER = os.path.join(SCRIPT_DIR, "bge-small-zh-v1.5")
+LOCAL_MODEL_PATH = os.path.join(SCRIPT_DIR, "bge-small-zh-v1.5")
+HF_MODEL_NAME = "BAAI/bge-small-zh-v1.5"
+
+# 优先本地路径（Transformers老版本环境），不存在则用 HF 名称（新版环境）
+if os.path.isdir(LOCAL_MODEL_PATH):
+    MODEL_PATH = LOCAL_MODEL_PATH
+else:
+    MODEL_PATH = HF_MODEL_NAME
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-logger.info("加载 BGE 模型 repo_id=%s cache=%s", REPO_ID, CACHE_FOLDER)
-tokenizer = AutoTokenizer.from_pretrained(REPO_ID, cache_dir=CACHE_FOLDER)
-model = AutoModel.from_pretrained(REPO_ID, cache_dir=CACHE_FOLDER).to(device)
+tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
+model = AutoModel.from_pretrained(MODEL_PATH).to(device)
 model.eval()
 
+
 def get_embedding(text: str) -> list:
-    """
-    查询向量化，和入库脚本get_embedding逻辑100%对齐
-    BGE官方：取CLS输出 + L2归一化
-    """
+    """查询向量化 — 与 ingest.py 保持 Mean Pooling 一致"""
     inputs = tokenizer(
         text,
         padding=True,
@@ -93,9 +95,7 @@ def get_embedding(text: str) -> list:
     ).to(device)
     with torch.no_grad():
         out = model(**inputs)
-    vec = out.last_hidden_state[:, 0]
-    vec = torch.nn.functional.normalize(vec, p=2, dim=1).squeeze()
-    return vec.cpu().numpy().tolist()
+    return out.last_hidden_state.mean(dim=1).squeeze().cpu().numpy().tolist()
 
 # ============================================================
 # 业务配置
@@ -496,10 +496,10 @@ class RAGPipeline:
                 concepts_str = "、".join(rewrite_result.modern_concepts[:3])
                 subs_str = "；".join(rewrite_result.sub_queries[:3])
                 rewrite_notice = (
-                        "\n\n[系统提醒：用户问题涉及「" + concepts_str + "」等概念，"
-                                                                       "这些在1936年后才出现。已将问题改写为：「" + subs_str + "」。"
-                                                                                                                            "请基于参考资料回答这些改写后的问题，并在回答开头用鲁迅口吻简要说明"
-                                                                                                                            "你只了解1936年前的事物。]"
+                    "\n\n[系统提醒：用户问题涉及「" + concepts_str + "」等概念，"
+                    "这些在1936年后才出现。已将问题改写为：「" + subs_str + "」。"
+                    "请基于参考资料回答这些改写后的问题，并在回答开头用鲁迅口吻简要说明"
+                    "你只了解1936年前的事物。]"
                 )
         elif rewrite_result and not rewrite_result.can_rewrite:
             # 改写失败 → 用越界话术回复

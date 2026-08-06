@@ -6,9 +6,17 @@ import torch
 from tqdm import tqdm
 
 # ==================== 全局配置 ====================
-current_dir = os.getcwd()
-MODEL_PATH = os.path.join(current_dir, "bge-small-zh-v1.5")
-ROOT = os.path.dirname(current_dir)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+
+LOCAL_MODEL_PATH = os.path.join(SCRIPT_DIR, "bge-small-zh-v1.5")
+HF_MODEL_NAME = "BAAI/bge-small-zh-v1.5"
+
+# 优先本地路径（Transformers老版本环境），不存在则用 HF 名称（Transformers新版环境）
+if os.path.isdir(LOCAL_MODEL_PATH):
+    MODEL_PATH = LOCAL_MODEL_PATH
+else:
+    MODEL_PATH = HF_MODEL_NAME
 JSON_FOLDER = os.path.join(ROOT, "data", "processed")
 CHROMA_STORE = os.path.join(ROOT, "chroma_db")
 # 文本分块参数
