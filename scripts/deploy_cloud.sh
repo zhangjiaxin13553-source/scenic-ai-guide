@@ -49,15 +49,22 @@ if [ ! -f space/requirements.txt ]; then
   exit 1
 fi
 
-# ---------- 3. 虚拟环境 + 依赖（CPU 版 torch，避免拉 ~2GB CUDA 轮子） ----------
-echo "[3/6] 创建 venv 并安装依赖 ..."
+# ---------- 3. 虚拟环境 + 依赖（CPU 版 torch，国内镜像加速） ----------
+echo "[3/6] 创建 venv 并安装依赖（需下载约 300MB，请耐心等待）..."
 python3 -m venv "$VENV_DIR"
 # shellcheck disable=SC1091
 source "$VENV_DIR/bin/activate"
-pip install --upgrade pip -q
-# 先装 CPU 版 torch，再装其余依赖（space/requirements.txt 已刻意不含 torch）
-pip install torch==2.12.0 --index-url https://download.pytorch.org/whl/cpu -q
-pip install -r space/requirements.txt -q
+pip install --upgrade pip
+# 国内镜像：pip 走清华源，torch CPU 走阿里云 pytorch-wheels 镜像（-f find-links）
+PIP_INDEX="${PIP_INDEX:-https://pypi.tuna.tsinghua.edu.cn/simple}"
+TORCH_FIND_LINKS="${TORCH_FIND_LINKS:-https://mirrors.aliyun.com/pytorch-wheels/cpu}"
+# 先装 CPU 版 torch（space/requirements.txt 已刻意不含 torch，避免拉 ~2GB CUDA 轮子）
+#   优先阿里云镜像；若该版本镜像缺失，回退官方 download.pytorch.org
+if ! pip install "torch==2.12.0+cpu" -i "$PIP_INDEX" -f "$TORCH_FIND_LINKS"; then
+  echo "    ⚠ 阿里云镜像无此 torch 版本，回退官方源（可能较慢）..."
+  pip install "torch==2.12.0" --index-url https://download.pytorch.org/whl/cpu
+fi
+pip install -r space/requirements.txt -i "$PIP_INDEX"
 
 # ---------- 4. 放置离线资源（BGE 模型 / 向量库 / 知识库） ----------
 echo "[4/6] 放置离线资源 ..."
