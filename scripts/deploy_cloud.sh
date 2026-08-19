@@ -31,14 +31,23 @@ command -v git     >/dev/null 2>&1 || sudo apt-get install -y git
 command -v unzip   >/dev/null 2>&1 || sudo apt-get install -y unzip
 python3 -m venv --help >/dev/null 2>&1 || sudo apt-get install -y python3-venv
 
-# ---------- 2. 拉取代码 ----------
+# ---------- 2. 拉取/更新代码 ----------
 if [ ! -d "$APP_DIR" ]; then
   echo "[2/6] 克隆仓库到 $APP_DIR ..."
   git clone "$REPO_URL" "$APP_DIR"
 else
-  echo "[2/6] 目录已存在，复用 $APP_DIR ..."
+  echo "[2/6] 目录已存在，git pull 更新到最新 ..."
+  git -C "$APP_DIR" pull --ff-only 2>/dev/null \
+    || echo "    ⚠ git pull 未成功（本地有改动或网络问题），继续使用现有代码"
 fi
 cd "$APP_DIR"
+
+# 前置校验：space/requirements.txt 缺失说明代码是旧版，直接给出可操作提示
+if [ ! -f space/requirements.txt ]; then
+  echo "❌ 缺少 space/requirements.txt，当前代码不是最新版。"
+  echo "   请先执行： cd $APP_DIR && git pull   （确认能联网拉到 GitHub）"
+  exit 1
+fi
 
 # ---------- 3. 虚拟环境 + 依赖（CPU 版 torch，避免拉 ~2GB CUDA 轮子） ----------
 echo "[3/6] 创建 venv 并安装依赖 ..."
