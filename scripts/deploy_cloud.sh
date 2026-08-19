@@ -86,15 +86,22 @@ fi
 echo "[5/6] 配置 .env ..."
 if [ ! -f .env ]; then
   cp .env.example .env
-  if [ -n "${LLM_API_KEY:-}" ]; then
-    sed -i "s|^LLM_API_KEY=.*|LLM_API_KEY=${LLM_API_KEY}|" .env
-    echo "    已写入 LLM_API_KEY"
-  else
-    echo "    ⚠ 未检测到 LLM_API_KEY，请编辑 $APP_DIR/.env 手动填入 DeepSeek Key"
-  fi
-else
-  echo "    .env 已存在，跳过"
 fi
+# 注入 LLM_API_KEY（若传入）
+if [ -n "${LLM_API_KEY:-}" ]; then
+  sed -i "s|^LLM_API_KEY=.*|LLM_API_KEY=${LLM_API_KEY}|" .env
+  echo "    已写入 LLM_API_KEY"
+else
+  echo "    ⚠ 未检测到 LLM_API_KEY，请编辑 $APP_DIR/.env 手动填入 DeepSeek Key"
+fi
+# 补齐关键字段（防止 .env 是旧版/残缺，缺失 LLM_BASE_URL 等导致 LLMClient 启动失败）
+for _key in LLM_BASE_URL LLM_MODEL LLM_THINKING LLM_MAX_TOKENS LLM_TEMPERATURE; do
+  if ! grep -q "^${_key}=" .env; then
+    _val="$(grep "^${_key}=" .env.example | cut -d= -f2-)"
+    echo "${_key}=${_val}" >> .env
+  fi
+done
+echo "    .env 关键字段：" && grep -E '^LLM_(BASE_URL|MODEL|THINKING)=' .env
 
 # ---------- 6. 启动 ----------
 echo "[6/6] 启动 Gradio 服务（端口 $APP_PORT）..."

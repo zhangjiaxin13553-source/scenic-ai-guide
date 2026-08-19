@@ -51,7 +51,8 @@ from typing import Optional, List, Dict, Any
 import requests
 from dotenv import load_dotenv
 
-load_dotenv()
+# 显式指向项目根目录的 .env（scripts/ 的上一级），避免依赖 CWD 或调用栈定位而找不到
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.env'))
 
 logger = logging.getLogger("llm_client")
 if not logger.handlers:
