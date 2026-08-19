@@ -9,5 +9,5 @@ requests==2.32.3
 python-dotenv==1.2.2
 tqdm==4.67.3
 numpy==2.2.0
-huggingface_hub==1.15.0
+huggingface_hub==1.28.0
 gradio==6.22.0
