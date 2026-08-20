@@ -1,4 +1,4 @@
-# 广州鲁迅纪念馆 · 鲁迅数字人（对话大脑）
+# 广州鲁迅纪念馆 · 鲁迅数字人
 
 面向广州鲁迅纪念馆的**具身智能**项目——机器人的「AI 大脑」。游客可跟「鲁迅」语音对话，也可切换讲解员模式了解场馆。
 
@@ -6,7 +6,7 @@
 
 ## 项目阶段
 
-1. **知识库构建** — 鲁迅作品/生平/场馆/语录/人设 5 域语料向量化入库（348 条 / 399 chunks）
+1. **知识库构建** — 鲁迅作品/生平/场馆/语录/人设 5 域语料向量化入库
 2. **对话管线** — RAG 全链路 + 讲解员 / 鲁迅数字人双模式自动切换
 3. **鲁棒性** — 4 层越界防护 + 幻觉检测 + 一致性校验 + 质量守卫
 4. **API 化部署** — FastAPI 接口服务，机器人「ASR → `/chat` → TTS」直接对接
@@ -19,7 +19,7 @@
 | Embedding | `BAAI/bge-small-zh-v1.5`（~91MB，本地）|
 | 向量库 | ChromaDB（本地持久化）|
 | 检索 | sentence-transformers + 多子查询合并去重 |
-| 服务 | FastAPI + uvicorn（默认 `0.0.0.0:8000`）|
+| 服务 | FastAPI + uvicorn|
 | 语言 | Python 3.12 |
 
 ## 目录结构
@@ -27,9 +27,9 @@
 ```
 scenic-ai-guide/
 ├── scripts/
-│   ├── api_server.py          # 阶段四：FastAPI 服务（机器人对接入口）
+│   ├── api_server.py          # FastAPI 服务（机器人对接入口）
 │   ├── rag_pipeline.py        # RAG 全链路 + 质量守卫
-│   ├── ingest.py              # 数据入库（重建向量库）
+│   ├── ingest.py              # 数据入库
 │   ├── pack_offline.py        # 三件套离线资源打包
 │   ├── start.bat              # Windows 一键启动
 │   └── bge-small-zh-v1.5/     # BGE 模型（gitignored，来自资源包）
@@ -78,7 +78,7 @@ pip install -r requirements.txt
 
 ```bash
 cp .env.example .env            # Windows: copy .env.example .env
-# 编辑 .env，填入 LLM_API_KEY（DeepSeek 密钥，勿提交 git）
+# 编辑 .env，填入 LLM_API_KEY
 ```
 
 ### 4. 启动
@@ -88,7 +88,7 @@ cp .env.example .env            # Windows: copy .env.example .env
 scripts\start.bat
 
 # 或手动启动
-python scripts/api_server.py    # 默认 0.0.0.0:8000
+python scripts/api_server.py    
 ```
 
 ### 5. 验证
@@ -105,26 +105,9 @@ curl http://localhost:8000/health
 
 ## 在线体验 Demo
 
-`space/` / `scripts/gradio_app.py` 是可独立部署的在线体验 Demo（Gradio 界面，讲解员 / 鲁迅双模式 + 调试面板）。三条部署路线：
-
-| 路线 | 公网可达 | 国内访问 | 说明 |
-|------|---------|---------|------|
-| **云服务器（推荐）** | ✅ 稳定 IP | ✅ 快 | 见 [docs/cloud-server-deploy.md](docs/cloud-server-deploy.md)，一键脚本 `scripts/deploy_cloud.sh` |
-| Render 免费档 | ✅ | 🟡 一般 | 见 [docs/render-deploy.md](docs/render-deploy.md)，免费但会休眠、512MB 易 OOM |
-| HuggingFace Spaces | ✅ | 🟡 | 免费 Gradio Space 已收 PRO（$9/月），见 [docs/hf-spaces-deploy.md](docs/hf-spaces-deploy.md) |
-
-> ⚠️ `gradio --share` 临时链接在墙内**连不上**（frpc 无法直连美国中转服务器），不建议作为交付链接。
-
+`space/` / `scripts/gradio_app.py` 是可独立部署的在线体验 Demo（Gradio 界面，讲解员 / 鲁迅双模式 + 调试面板）。
 三件套资源（BGE 模型 / 向量库 / 知识库）与 DeepSeek API Key 均**不进 git**：
 - 云服务器 / Render 冷启动自动下载 BGE 模型，向量库随 `space/chroma_db/` 提交（约 3MB）；
 - API Key 通过环境变量（`LLM_API_KEY`）注入，**不写入代码**。
 
-## 团队
 
-| 成员 | 阶段四职责 |
-|------|-----------|
-| 张嘉欣 | 组长 · API Owner（`api_server.py` + 接口协议）|
-| 花敬皓 | Core Dev（环境固化 + 打包）|
-| 窦一禾 | 离线资源打包 |
-| 陈奕君 | 机器人对接文档 + 演示脚本 |
-| 杜佳琳 | 部署测试 + checklist |
