@@ -1,7 +1,10 @@
 """
-在线体验 Demo —— HuggingFace Spaces 入口
-==========================================
+在线体验 Demo —— HuggingFace Spaces / Render 入口
+==================================================
 广州鲁迅纪念馆 · 鲁迅数字人（双模式对话）
+
+> 本文件是「HF Spaces / Render」专用入口；云服务器部署用 scripts/gradio_app.py，
+> 机器人对接用 scripts/api_server.py。三者底层共用 scripts/rag_pipeline.py，仅入口包装不同。
 
 - 讲解员模式：回答场馆 / 展品 / 参观信息
 - 鲁迅数字人模式：以鲁迅口吻对话（5 层越界防护 + 质量守卫）

@@ -43,6 +43,12 @@ scenic-ai-guide/
 
 ## 快速开始
 
+> 🚀 **两条启动入口（最快上手）**
+> - **看聊天界面**（评审 / 演示）→ `python scripts/gradio_app.py` → 浏览器打开 `http://139.9.103.86:7860`
+> - **对接机器人**（FastAPI）→ Windows 一键 `scripts\start.bat`，或 `python scripts/api_server.py` → `http://localhost:8000`
+>
+> 下面 0~3 步是两者共同的前置准备。
+
 ### 0. 前置
 
 - Python 3.12（实测 3.12.1）
@@ -81,10 +87,18 @@ cp .env.example .env            # Windows: copy .env.example .env
 # 编辑 .env，填入 LLM_API_KEY
 ```
 
-### 4. 启动
+### 4. 启动（两条入口，按需选择）
+
+**入口 A · 看效果（Gradio 聊天界面，推荐评审 / 演示）**
 
 ```bash
-# Windows 一键启动（校验环境 + 装依赖 + 校验资源 + 启动服务）
+python scripts/gradio_app.py    # 浏览器打开 http://127.0.0.1:7860
+```
+
+**入口 B · 机器人对接（FastAPI 接口）**
+
+```bash
+# Windows 一键启动（校验环境 + 装依赖 + 校验资源 + 启动 FastAPI）
 scripts\start.bat
 
 # 或手动启动
@@ -92,6 +106,10 @@ python scripts/api_server.py
 ```
 
 ### 5. 验证
+
+**入口 A（Gradio）**：浏览器打开 `http://127.0.0.1:7860`，直接提问即可（右侧调试面板会显示意图 / 检索 / 守卫状态）。
+
+**入口 B（FastAPI）**：
 
 ```bash
 curl http://localhost:8000/health

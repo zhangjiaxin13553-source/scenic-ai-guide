@@ -1,3 +1,8 @@
+# ⚠️ 已归档（2026-08-19）：本文件为 gradio_app.py 的增强实验版，已停止维护。
+#   现役 Gradio 入口统一为 scripts/gradio_app.py（本机/云服务器）与 space/app.py（HF/Render）。
+#   归档原因：路径依赖 cwd 脆弱、硬编码 HF 国内镜像、内嵌 BGE 加载与 rag_pipeline 重复。
+#   留底参考，勿再作为启动入口。
+
 # Gradio 聊天界面 + 向量库构建 + RAG全链路质量守卫一体化脚本
 # 【重要：本版本只修改gradio_app，rag_pipeline.py完全不改动】
 """

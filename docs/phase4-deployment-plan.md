@@ -192,7 +192,7 @@ Week 1 ─────── Week 2 ─────── Week 3 ─────
 |---|------|------|------|--------|
 | 1 | **FastAPI 服务** | 封装 `RAGPipeline.ask()` 为 REST：`/chat` `/health` `/reset`；全局单例复用，避免重复加载模型；所有异常转兜底文本 | `scripts/api_server.py` | 🔴 |
 | 2 | **对接协议文档** | 定义请求/响应 JSON schema、错误语义、超时约定、`session_id` 规则 | `docs/deployment-guide.md`（接口章节） | 🔴 |
-| 3 | **死代码清理** | `demo1.py` 与 `gradio_app.py` 保留一个（推荐保留功能更全的 `demo1.py`，删 `gradio_app.py`）；删除 `recovery.py` 中未被引用的重复熔断器 | 清理后的仓库 | 🟡 |
+| 3 | **死代码清理** | ✅ `demo1.py` 已归档到 `scripts/archive/`，`gradio_app.py` 为唯一 Gradio 入口（云部署脚本已用它）；`recovery.py` 中未被引用的重复熔断器待删 | 清理后的仓库 | 🟡 |
 | 4 | **Gradio 与 API 共存** | 确认两者可同时跑、共用同一 `RAGPipeline`（或分进程），现场人工演示用 Gradio | 集成说明 | 🟡 |
 
 ### 花敬皓（Core Dev — 环境固化 + 端侧落地）
@@ -264,7 +264,7 @@ scenic-ai-guide/
 │   ├── start.bat                # 🆕 花敬皓: Windows 一键启动
 │   ├── start.sh                 # 🆕 花敬皓: Linux/Jetson 一键启动
 │   ├── pack_offline.py          # 🆕 窦一禾: 三件套离线打包脚本
-│   └── (清理) gradio_app.py / recovery.py 中的重复代码
+│   └── (归档) demo1.py → scripts/archive/；清理 recovery.py 重复熔断器
 ├── docs/
 │   ├── phase4-deployment-plan.md   # 🆕 本方案
 │   ├── deployment-guide.md         # 🆕 张嘉欣: 部署指南 + 接口协议
