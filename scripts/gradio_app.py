@@ -1,5 +1,5 @@
 """
-Gradio 聊天界面（阶段三增强版）
+Gradio 聊天界面（鲁迅数字人智能对话系统 V1.0）
 ==============
 对接 rag_pipeline.py，提供双模式（讲解/数字人）对话界面 + 调试面板。
 
@@ -288,10 +288,10 @@ def create_ui():
     footer { display: none !important; }
     """
 
-    with gr.Blocks(title="鲁迅数字人 · 双模式对话（阶段三）", css=css) as demo:
+    with gr.Blocks(title="鲁迅数字人智能对话系统 V1.0", css=css) as demo:
         gr.Markdown(
             """
-            # 🏛️ 鲁迅数字人 · 双模式对话系统
+            # 🏛️ 鲁迅数字人智能对话系统 V1.0
             **讲解员模式** · 回答场馆、展品、参观信息 ｜ **数字人模式** · 以鲁迅口吻与你对话
             """
         )
@@ -370,7 +370,7 @@ def create_ui():
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="鲁迅数字人 Gradio 聊天界面（阶段三）")
+    parser = argparse.ArgumentParser(description="鲁迅数字人智能对话系统 V1.0 — Gradio 聊天界面")
     parser.add_argument("--port", type=int, default=7860, help="服务端口（默认 7860）")
     parser.add_argument("--host", type=str, default="0.0.0.0", help="绑定地址")
     parser.add_argument("--share", action="store_true", help="生成公网链接")

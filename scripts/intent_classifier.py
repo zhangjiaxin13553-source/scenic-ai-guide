@@ -1,5 +1,5 @@
 """
-意图分类器 — 阶段二
+意图分类器
 基于规则的五分类：narrator / luxun / ambiguous / reject_time / reject_irrelevant
 支持作为独立模块或 RAG 管线中的一个环节调用
 

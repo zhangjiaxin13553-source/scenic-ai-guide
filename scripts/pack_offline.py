@@ -1,5 +1,5 @@
 """
-离线资源打包脚本 — 阶段四
+离线资源打包脚本
 ========================
 将「三件套」离线资源打成独立 zip 分发：
   1. BGE 嵌入模型（bge-small-zh-v1.5，~91MB）
@@ -169,7 +169,7 @@ def verify_zip(zip_path: str) -> None:
 # ==================== 主流程 ====================
 
 def main():
-    parser = argparse.ArgumentParser(description="阶段四 离线资源打包脚本")
+    parser = argparse.ArgumentParser(description="离线资源打包脚本")
     parser.add_argument("--output", "-o", type=str, default=None,
                         help=f"输出 zip 路径 (默认: {DEFAULT_OUTPUT})")
     parser.add_argument("--no-verify", action="store_true",

@@ -831,7 +831,7 @@ class RAGPipeline:
         """命令行交互式对话"""
         print()
         print("╔" + "═" * 58 + "╗")
-        print("║  鲁迅数字人 · 双模式对话系统                            ║")
+        print("║  鲁迅数字人智能对话系统                                  ║")
         print("║  讲解员模式 | 鲁迅口吻 | 自动意图识别                    ║")
         print("║  输入 /verbose 切换调试模式  |  /reset 重置对话  |  exit ║")
         print("╚" + "═" * 58 + "╝")
